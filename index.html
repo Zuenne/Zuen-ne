@@ -32,10 +32,15 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer; /* Thêm con trỏ để chỉ ra có thể click */
         }
         .content-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+        .content-card.swot-active {
+            border: 2px solid #5A8C77;
+            background-color: #F0F5F2; /* Nền nhạt hơn khi active */
         }
         .chart-container {
             position: relative;
@@ -134,26 +139,19 @@
             },
             swot: {
                 icon: '📊',
-                title: 'SWOT (Phân tích)',
-                intro: 'Phân tích SWOT (Strengths, Weaknesses, Opportunities, Threats) giúp đánh giá toàn diện vị thế và tiềm năng phát triển của Life Fitness Đà Nẵng.',
-                points: [
-                    { title: 'Strengths (Điểm mạnh)', content: 'Vị trí đắc địa tại trung tâm, thiết bị hiện đại và đa dạng, đội ngũ PT chuyên nghiệp và nhiệt tình, không gian sạch sẽ thoáng đãng, mở cửa 24/7.' },
-                    { title: 'Weaknesses (Điểm yếu)', content: 'Mức độ nhận diện thương hiệu ban đầu còn thấp so với các chuỗi lớn, chi phí hội viên có thể cao hơn một số phòng gym nhỏ khác, chưa có ứng dụng di động riêng.' },
-                    { title: 'Opportunities (Cơ hội)', content: 'Nhu cầu tập luyện và nâng cao sức khỏe ngày càng tăng tại Đà Nẵng, xu hướng lối sống lành mạnh được đẩy mạnh, khả năng hợp tác với các doanh nghiệp, tổ chức địa phương.' },
-                    { title: 'Threats (Thách thức)', content: 'Cạnh tranh gay gắt từ các phòng gym đã có thương hiệu và các trung tâm mới, biến động kinh tế ảnh hưởng đến chi tiêu cho dịch vụ giải trí/sức khỏe, dịch bệnh có thể ảnh hưởng đến hoạt động.' },
-                ]
-            },
-            solution: {
-                icon: '✅',
-                title: 'Hướng khắc phục',
-                intro: 'Dựa trên phân tích SWOT, đây là các đề xuất chiến lược để phát huy điểm mạnh, khắc phục điểm yếu, tận dụng cơ hội và đối phó với thách thức của Life Fitness Đà Nẵng.',
-                points: [
-                    { title: 'Nâng cao nhận diện thương hiệu', content: 'Đẩy mạnh các chiến dịch marketing số trên Facebook, Instagram, TikTok. Hợp tác với các KOL/influencer về fitness tại Đà Nẵng để tăng độ phủ sóng. Tổ chức các sự kiện trải nghiệm miễn phí.' },
-                    { title: 'Đa dạng hóa gói hội viên & ưu đãi', content: 'Thiết kế các gói tập linh hoạt hơn (ví dụ: gói theo buổi, gói giờ thấp điểm) để phù hợp với nhiều đối tượng khách hàng. Triển khai chương trình ưu đãi cho nhóm, gia đình hoặc khách hàng thân thiết.' },
-                    { title: 'Phát triển ứng dụng di động', content: 'Đầu tư phát triển ứng dụng di động riêng để hội viên dễ dàng quản lý lịch tập, đặt lịch PT, theo dõi tiến độ, nhận thông báo khuyến mãi và tương tác với phòng tập.' },
-                    { title: 'Mở rộng dịch vụ & hợp tác', content: 'Xem xét mở rộng các dịch vụ bổ sung như tư vấn dinh dưỡng, vật lý trị liệu cơ bản. Tích cực tìm kiếm cơ hội hợp tác với các công ty, trường học, chung cư để cung cấp gói tập ưu đãi.' },
-                    { title: 'Tạo trải nghiệm khác biệt', content: 'Tổ chức các thử thách tập luyện, cuộc thi nội bộ để tăng tính gắn kết và động lực cho hội viên. Cải thiện dịch vụ chăm sóc khách hàng để tạo sự hài lòng vượt trội.' },
-                    { title: 'Xây dựng kế hoạch dự phòng', content: 'Chuẩn bị các kịch bản ứng phó với biến động kinh tế hoặc dịch bệnh (ví dụ: gói tập online, mở bán các thiết bị tập tại nhà) để duy trì hoạt động và doanh thu.' },
+                title: 'SWOT (Phân tích & Chiến lược)',
+                intro: 'Phân tích SWOT (Strengths, Weaknesses, Opportunities, Threats) giúp đánh giá toàn diện và đề xuất các chiến lược phát triển cho Life Fitness Đà Nẵng. Nhấp vào từng yếu tố (S, W, O, T) để xem các chiến lược kết hợp liên quan.',
+                basicSwot: [
+                    { type: 'S', title: 'Strengths (S - Điểm mạnh)', content: 'Vị trí đắc địa tại trung tâm, thiết bị hiện đại và đa dạng, đội ngũ PT chuyên nghiệp và nhiệt tình, không gian sạch sẽ thoáng đãng, mở cửa 24/7.' },
+                    { type: 'W', title: 'Weaknesses (W - Điểm yếu)', content: 'Mức độ nhận diện thương hiệu ban đầu còn thấp so với các chuỗi lớn, chi phí hội viên có thể cao hơn một số phòng gym nhỏ khác, chưa có ứng dụng di động riêng.' },
+                    { type: 'O', title: 'Opportunities (O - Cơ hội)', content: 'Nhu cầu tập luyện và nâng cao sức khỏe ngày càng tăng tại Đà Nẵng, xu hướng lối sống lành mạnh được đẩy mạnh, khả năng hợp tác với các doanh nghiệp, tổ chức địa phương.' },
+                    { type: 'T', title: 'Threats (T - Thách thức)', content: 'Cạnh tranh gay gắt từ các phòng gym đã có thương hiệu và các trung tâm mới, biến động kinh tế ảnh hưởng đến chi tiêu cho dịch vụ giải trí/sức khỏe, dịch bệnh có thể ảnh hưởng đến hoạt động.' },
+                ],
+                combinedStrategies: [
+                    { types: ['S', 'O'], title: 'S+O: Phát huy điểm mạnh, nắm bắt cơ hội', content: 'Tận dụng vị trí đắc địa, thiết bị hiện đại và đội ngũ PT chuyên nghiệp để thu hút lượng lớn khách hàng đang có nhu cầu nâng cao sức khỏe tại Đà Nẵng. Tổ chức các buổi workshop, sự kiện sức khỏe cộng đồng miễn phí tại phòng tập để vừa quảng bá, vừa tạo giá trị cho cộng đồng, đặc biệt khi xu hướng sống lành mạnh đang lên cao. Điều này sẽ giúp tăng cường vị thế và mở rộng thị trường khách hàng.' },
+                    { types: ['S', 'W'], title: 'S+W: Sử dụng điểm mạnh khắc phục điểm yếu', content: 'Với đội ngũ PT chất lượng và không gian 24/7, Life Fitness có thể tạo ra các gói tập luyện cá nhân hóa, độc đáo, và trải nghiệm khách hàng vượt trội để biện minh cho mức phí hội viên (có thể cao hơn). Đồng thời, đẩy mạnh truyền thông nội dung về chất lượng dịch vụ để tăng nhận diện thương hiệu, và dùng nguồn lực hiện có để phát triển một ứng dụng di động đơn giản cho việc đặt lịch, quản lý gói tập, giúp tăng tiện ích cho hội viên.' },
+                    { types: ['W', 'T'], title: 'W+T: Khắc phục điểm yếu, đối phó thách thức', content: 'Để giảm thiểu rủi ro từ cạnh tranh và biến động kinh tế, Life Fitness cần nhanh chóng tăng cường nhận diện thương hiệu thông qua marketing tập trung và các chiến dịch ưu đãi hấp dẫn để thu hút khách hàng mới. Đồng thời, xây dựng các gói tập linh hoạt và cân nhắc mở bán các thiết bị tập tại nhà để có nguồn thu dự phòng khi dịch bệnh hoặc khó khăn kinh tế ảnh hưởng đến hoạt động tại phòng tập, giảm thiểu tác động từ các yếu tố bên ngoài.' },
+                    { types: ['O', 'W'], title: 'O+W: Tận dụng cơ hội để giảm thiểu điểm yếu', content: 'Trước nhu cầu tập luyện tăng và xu hướng sống lành mạnh, Life Fitness có cơ hội lớn để mở rộng quy mô và đa dạng hóa dịch vụ. Tuy nhiên, cần giải quyết vấn đề nhận diện thương hiệu và chi phí hội viên bằng cách hợp tác với các doanh nghiệp, tổ chức địa phương để tiếp cận nhóm khách hàng mới thông qua các gói tập ưu đãi, đồng thời quảng bá mạnh mẽ các giá trị khác biệt và chất lượng dịch vụ để thu hút và giữ chân khách hàng.' },
                 ]
             }
         };
@@ -170,34 +168,61 @@
                 <div class="fade-in">
                     <h2 class="text-3xl font-bold mb-2 text-[#2D463B]">${data.icon} ${data.title}</h2>
                     <p class="text-gray-600 mb-8">${data.intro}</p>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             `;
             
-            data.points.forEach(point => {
+            if (key === 'swot') {
                 contentHTML += `
-                    <div class="content-card p-6">
-                        <h3 class="font-bold text-xl mb-3 text-[#5A8C77]">${point.title}</h3>
-                        <p class="text-gray-700 leading-relaxed">${point.content}</p>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 `;
-            });
-
-            if (data.chart) {
-                contentHTML += `
-                    <div class="content-card p-6 lg:col-span-2">
-                        <h3 class="font-bold text-xl mb-3 text-center text-[#5A8C77]">Biểu đồ Cơ cấu Khách hàng (Ví dụ)</h3>
-                        <p class="text-gray-600 text-center mb-4">Biểu đồ dưới đây minh họa một cơ cấu khách hàng giả định để phân tích sâu hơn về nhóm đối tượng mục tiêu.</p>
-                        <div class="chart-container">
-                            <canvas id="customerChart"></canvas>
+                data.basicSwot.forEach(point => {
+                    contentHTML += `
+                        <div class="content-card p-6 swot-basic-card" data-swot-type="${point.type}">
+                            <h3 class="font-bold text-xl mb-3 text-[#5A8C77]">${point.title}</h3>
+                            <p class="text-gray-700 leading-relaxed">${point.content}</p>
                         </div>
+                    `;
+                });
+                contentHTML += `</div>
+                    <h3 class="font-bold text-2xl mb-4 text-[#2D463B] text-center">Chiến lược Kết hợp</h3>
+                    <p class="text-gray-600 text-center mb-6">Nhấp vào từng yếu tố SWOT cơ bản ở trên để xem các chiến lược liên quan, hoặc nhấp nút dưới đây để xem tất cả.</p>
+                    <div class="flex justify-center mb-8">
+                        <button id="show-all-strategies-btn" class="bg-[#5A8C77] hover:bg-[#4A7A6B] text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300">
+                            Hiển thị tất cả chiến lược
+                        </button>
                     </div>
+                    <div id="combined-strategies-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        </div>
                 `;
+            } else {
+                contentHTML += `<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">`;
+                data.points.forEach(point => {
+                    contentHTML += `
+                        <div class="content-card p-6">
+                            <h3 class="font-bold text-xl mb-3 text-[#5A8C77]">${point.title}</h3>
+                            <p class="text-gray-700 leading-relaxed">${point.content}</p>
+                        </div>
+                    `;
+                });
+                if (data.chart) {
+                    contentHTML += `
+                        <div class="content-card p-6 lg:col-span-2">
+                            <h3 class="font-bold text-xl mb-3 text-center text-[#5A8C77]">Biểu đồ Cơ cấu Khách hàng (Ví dụ)</h3>
+                            <p class="text-gray-600 text-center mb-4">Biểu đồ dưới đây minh họa một cơ cấu khách hàng giả định để phân tích sâu hơn về nhóm đối tượng mục tiêu.</p>
+                            <div class="chart-container">
+                                <canvas id="customerChart"></canvas>
+                            </div>
+                        </div>
+                    `;
+                }
             }
 
             contentHTML += '</div></div>';
             mainContent.innerHTML = contentHTML;
 
-            if (data.chart) {
+            if (key === 'swot') {
+                addSwotInteraction();
+                renderCombinedStrategies(); // Render all strategies by default when SWOT section is loaded
+            } else if (data.chart) {
                 renderChart();
             }
             
@@ -207,6 +232,62 @@
                     item.classList.add('active');
                 }
             });
+        }
+
+        function renderCombinedStrategies(swotType = null) {
+            const container = document.getElementById('combined-strategies-container');
+            if (!container) return;
+
+            const swotData = analysisData.swot;
+            let filteredStrategies = swotData.combinedStrategies;
+
+            if (swotType) {
+                filteredStrategies = swotData.combinedStrategies.filter(strategy => 
+                    strategy.types.includes(swotType)
+                );
+            }
+
+            let strategiesHTML = '';
+            if (filteredStrategies.length > 0) {
+                filteredStrategies.forEach(strategy => {
+                    strategiesHTML += `
+                        <div class="content-card p-6">
+                            <h3 class="font-bold text-xl mb-3 text-[#5A8C77]">${strategy.title}</h3>
+                            <p class="text-gray-700 leading-relaxed">${strategy.content}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                strategiesHTML = `<p class="text-center text-gray-600 lg:col-span-2">Không có chiến lược kết hợp nào liên quan được tìm thấy cho lựa chọn này.</p>`;
+            }
+            container.innerHTML = strategiesHTML;
+
+            // Highlight active basic SWOT card
+            document.querySelectorAll('.swot-basic-card').forEach(card => {
+                card.classList.remove('swot-active');
+                if (swotType && card.dataset.swotType === swotType) {
+                    card.classList.add('swot-active');
+                }
+            });
+        }
+
+        function addSwotInteraction() {
+            document.querySelectorAll('.swot-basic-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const swotType = this.dataset.swotType;
+                    renderCombinedStrategies(swotType);
+                });
+            });
+
+            const showAllBtn = document.getElementById('show-all-strategies-btn');
+            if (showAllBtn) {
+                showAllBtn.addEventListener('click', function() {
+                    renderCombinedStrategies(); // Render all strategies
+                    document.querySelectorAll('.swot-basic-card').forEach(card => {
+                        card.classList.remove('swot-active'); // Remove active highlight
+                    });
+                });
+            }
         }
         
         function renderChart() {
