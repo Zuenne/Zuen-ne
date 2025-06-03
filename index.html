@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân tích Tương tác: Life Fitness Đà Nẵng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #4A4A4A;
+        }
+        .nav-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .nav-item.active {
+            border-left-color: #5A8C77;
+            background-color: #E8EAE6;
+            color: #2D463B;
+        }
+        .nav-item:hover {
+            background-color: #E8EAE6;
+        }
+        .content-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-10 md:mb-16">
+            <h1 class="text-3xl md:text-5xl font-bold text-[#2D463B]">Phân tích 5W1H</h1>
+            <p class="text-lg md:text-xl mt-2 text-gray-600">Life Fitness Đà Nẵng</p>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-8 md:gap-12">
+            <nav id="nav-menu" class="flex md:flex-col md:w-1/4 lg:w-1/5 bg-white rounded-xl p-4 shadow-sm h-full flex-wrap justify-center md:justify-start">
+            </nav>
+
+            <main id="main-content" class="w-full md:w-3/4 lg:w-4/5">
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const analysisData = {
+            what: {
+                icon: '💡',
+                title: 'What (Cái gì?)',
+                intro: 'Phần này xác định các sản phẩm, dịch vụ cốt lõi, mô hình kinh doanh và những giá trị độc đáo mà Life Fitness Đà Nẵng mang lại cho khách hàng.',
+                points: [
+                    { title: 'Sản phẩm & Dịch vụ', content: 'Cung cấp phòng tập gym với thiết bị hiện đại, các lớp học nhóm đa dạng (Yoga, Zumba, Body Combat), và dịch vụ huấn luyện viên cá nhân (PT) chuyên nghiệp.' },
+                    { title: 'Mô hình kinh doanh', content: 'Hoạt động dựa trên việc bán các gói hội viên theo thời gian (tháng, quý, năm), các gói tập luyện với PT, và vé tập lẻ cho khách hàng vãng lai.' },
+                    { title: 'Giá trị cốt lõi & Điểm khác biệt', content: 'Tập trung vào việc xây dựng một cộng đồng tập luyện thân thiện, cung cấp không gian sạch sẽ, thiết bị cao cấp và đội ngũ huấn luyện viên có chuyên môn cao, nhiệt tình.' },
+                ]
+            },
+            where: {
+                icon: ' ',
+                title: 'Where (Ở đâu?)',
+                intro: 'Khám phá vị trí địa lý, thị trường mục tiêu và các kênh mà Life Fitness Đà Nẵng sử dụng để tiếp cận và tương tác với khách hàng.',
+                points: [
+                    { title: 'Địa điểm hoạt động', content: 'Phòng tập có địa chỉ tại 453 - 455 Hoàng Diệu, Đà Nẵng, Việt Nam, thuận tiện cho việc di chuyển của hội viên.' },
+                    { title: 'Thị trường mục tiêu', content: 'Tập trung phục vụ cộng đồng dân cư và người lao động sinh sống, làm việc tại thành phố Đà Nẵng.' },
+                    { title: 'Kênh tương tác & Quảng bá', content: 'Kênh chính là trang Facebook để cập nhật thông tin, lịch học và chương trình khuyến mãi. Có thể sử dụng thêm Instagram, Zalo và website để mở rộng phạm vi tiếp cận.' },
+                ]
+            },
+            when: {
+                icon: '🕒',
+                title: 'When (Khi nào?)',
+                intro: 'Phân tích các yếu tố về mặt thời gian, bao gồm giờ hoạt động, lịch sử hình thành và các khung thời gian quan trọng cho các hoạt động kinh doanh.',
+                points: [
+                    { title: 'Giờ hoạt động', content: 'Mở cửa 24/7, tạo điều kiện linh hoạt tối đa cho hội viên có lịch trình bận rộn.' },
+                    { title: 'Lịch sử & Cột mốc', content: 'Được thành lập vào tháng 5 năm 2025, Life Fitness Đà Nẵng là một trung tâm thể dục mới với tầm nhìn hiện đại.' },
+                    { title: 'Lịch học & Sự kiện', content: 'được cập nhật đều đặn hàng tuần trên fanpage. Các chương trình khuyến mãi thường được tung ra vào các dịp lễ, Tết hoặc kỷ niệm đặc biệt.' },
+                ]
+            },
+            who: {
+                icon: '👥',
+                title: 'Who (Ai?)',
+                intro: 'Xác định các đối tượng liên quan chính đến doanh nghiệp, bao gồm khách hàng, đối thủ cạnh tranh và đội ngũ nhân sự cốt lõi.',
+                points: [
+                    { title: 'Khách hàng mục tiêu', content: 'Bao gồm nhiều nhóm đối tượng: người trẻ có nhu cầu cải thiện vóc dáng, nhân viên văn phòng muốn rèn luyện sức khỏe, người trung niên và cả những người cần phục hồi chức năng thông qua tập luyện có hướng dẫn.' },
+                    { title: 'Đối thủ cạnh tranh', content: 'Các chuỗi phòng tập lớn có mặt tại Đà Nẵng (California, Elite Fitness) và các phòng gym, trung tâm thể hình vừa và nhỏ tại địa phương.' },
+                    { title: 'Đội ngũ nhân sự', content: 'Bao gồm đội ngũ quản lý, lễ tân thân thiện, và đặc biệt là dàn huấn luyện viên cá nhân (PT) được giới thiệu là có bằng cấp, kinh nghiệm và chuyên môn cao.' },
+                ],
+                chart: true
+            },
+            why: {
+                icon: '❓',
+                title: 'Why (Tại sao?)',
+                intro: 'Đi sâu vào lý do và động lực đằng sau sự tồn tại và các quyết định của doanh nghiệp, giúp hiểu rõ lợi thế cạnh tranh và mục tiêu dài hạn.',
+                points: [
+                    { title: 'Lý do khách hàng lựa chọn', content: 'Các yếu tố thu hút khách hàng có thể là: chất lượng và sự đa dạng của thiết bị, không gian tập luyện sạch sẽ và chuyên nghiệp, sự nhiệt tình và chuyên môn của PT, vị trí thuận lợi, và mức giá hợp lý.' },
+                    { title: 'Sứ mệnh & Tầm nhìn', content: 'Doanh nghiệp hướng đến việc không chỉ là một nơi tập luyện, mà còn là nơi truyền cảm hứng về lối sống lành mạnh, năng động và tích cực cho cộng đồng.' },
+                    { title: 'Lợi thế cạnh tranh', content: 'Có thể nằm ở việc tạo ra một không khí cộng đồng gắn kết, các chương trình tập luyện độc đáo, hoặc dịch vụ chăm sóc khách hàng vượt trội so với đối thủ.' },
+                ]
+            },
+            how: {
+                icon: '⚙️',
+                title: 'How (Làm thế nào?)',
+                intro: 'Mô tả cách thức doanh nghiệp vận hành, tiếp thị và cung cấp dịch vụ đến tay khách hàng, thể hiện các quy trình và chiến lược cụ thể.',
+                points: [
+                    { title: 'Cách thức vận hành', content: 'Quản lý hoạt động hàng ngày của phòng tập, bảo trì thiết bị định kỳ, sắp xếp lịch làm việc cho nhân viên và PT, đảm bảo chất lượng dịch vụ luôn ở mức cao.' },
+                    { title: 'Chiến lược tiếp thị & Bán hàng', content: 'Sử dụng mạnh mẽ các kênh truyền thông xã hội (Facebook, Instagram) để quảng bá hình ảnh, chạy quảng cáo, tung ra các gói ưu đãi, và tổ chức các sự kiện trải nghiệm để thu hút khách hàng mới.' },
+                    { title: 'Quy trình cung cấp dịch vụ', content: 'Khách hàng được tư vấn kỹ lưỡng về các gói tập và dịch vụ phù hợp. Quy trình thanh toán và kích hoạt thẻ hội viên nhanh chóng. Cung cấp sự hỗ trợ liên tục trong quá trình tập luyện.' },
+                ]
+            }
+        };
+
+        const navMenu = document.getElementById('nav-menu');
+        const mainContent = document.getElementById('main-content');
+        let currentChart = null;
+
+        function renderContent(key) {
+            const data = analysisData[key];
+            if (!data) return;
+
+            let contentHTML = `
+                <div class="fade-in">
+                    <h2 class="text-3xl font-bold mb-2 text-[#2D463B]">${data.icon} ${data.title}</h2>
+                    <p class="text-gray-600 mb-8">${data.intro}</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            `;
+            
+            data.points.forEach(point => {
+                contentHTML += `
+                    <div class="content-card p-6">
+                        <h3 class="font-bold text-xl mb-3 text-[#5A8C77]">${point.title}</h3>
+                        <p class="text-gray-700 leading-relaxed">${point.content}</p>
+                    </div>
+                `;
+            });
+
+            if (data.chart) {
+                contentHTML += `
+                    <div class="content-card p-6 lg:col-span-2">
+                        <h3 class="font-bold text-xl mb-3 text-center text-[#5A8C77]">Biểu đồ Cơ cấu Khách hàng (Ví dụ)</h3>
+                        <p class="text-gray-600 text-center mb-4">Biểu đồ dưới đây minh họa một cơ cấu khách hàng giả định để phân tích sâu hơn về nhóm đối tượng mục tiêu.</p>
+                        <div class="chart-container">
+                            <canvas id="customerChart"></canvas>
+                        </div>
+                    </div>
+                `;
+            }
+
+            contentHTML += '</div></div>';
+            mainContent.innerHTML = contentHTML;
+
+            if (data.chart) {
+                renderChart();
+            }
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if(item.dataset.key === key) {
+                    item.classList.add('active');
+                }
+            });
+        }
+        
+        function renderChart() {
+            const ctx = document.getElementById('customerChart').getContext('2d');
+            
+            if(currentChart) {
+                currentChart.destroy();
+            }
+
+            currentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['18-25 tuổi', '26-35 tuổi', '36-50 tuổi', 'Trên 50 tuổi'],
+                    datasets: [{
+                        label: 'Phân bổ độ tuổi',
+                        data: [45, 35, 15, 5],
+                        backgroundColor: [
+                            'rgba(90, 140, 119, 0.8)',
+                            'rgba(90, 140, 119, 0.6)',
+                            'rgba(90, 140, 119, 0.4)',
+                            'rgba(90, 140, 119, 0.2)'
+                        ],
+                        borderColor: [
+                            '#5A8C77',
+                            '#5A8C77',
+                            '#5A8C77',
+                            '#5A8C77'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function init() {
+            Object.keys(analysisData).forEach(key => {
+                const data = analysisData[key];
+                const navItem = document.createElement('a');
+                navItem.href = '#';
+                navItem.dataset.key = key;
+                navItem.className = 'nav-item p-4 rounded-lg flex items-center gap-3 text-lg font-semibold';
+                navItem.innerHTML = `<span>${data.icon}</span> <span class="hidden md:inline">${data.title}</span>`;
+                navItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    renderContent(key);
+                });
+                navMenu.appendChild(navItem);
+            });
+            renderContent('what');
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
