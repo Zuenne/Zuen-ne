@@ -1,0 +1,989 @@
+import React, { useState, useEffect } from 'react';
+import { List, Star, MessageSquare, Utensils, Briefcase, Dumbbell, Laptop, BookOpen, Plane, HeartPulse } from 'lucide-react'; // Importing icons
+
+// Language content object
+const languageContent = {
+  vi: {
+    appName: "Kế hoạch hàng ngày",
+    currentDatePrefix: "", // Date will be formatted in useEffect
+    messageAddTask: "Đã thêm công việc!",
+    messageEnterTask: "Vui lòng nhập công việc!",
+    messageUpdateTask: "Đã cập nhật công việc!",
+    messageEmptyTaskContent: "Nội dung công việc không được để trống!",
+    messageNoCompletedTasks: "Chưa có công việc nào hoàn thành để xóa.",
+    messageClearCompleted: "Đã xóa các công việc hoàn thành!",
+    messageAddVocab: "Đã thêm từ vựng!",
+    messageEmptyVocab: "Vui lòng nhập từ và nghĩa của từ vựng!",
+    messageUpdateVocab: "Đã cập nhật từ vựng!",
+    messageEmptyVocabContent: "Từ và nghĩa của từ vựng không được để trống!",
+    messageDeleteVocab: "Đã xóa từ vựng!",
+    placeholderNewTask: "Thêm công việc mới...",
+    buttonAdd: "Thêm",
+    labelSelectCategory: "Chọn danh mục:",
+    labelPriority: "Mức độ ưu tiên:",
+    labelDueDate: "Ngày hết hạn (tùy chọn):",
+    labelNote: "Ghi chú (tùy chọn):",
+    placeholderTaskNote: "Thêm ghi chú chi tiết cho công việc...",
+    // Task categories and priorities for display
+    taskCategories: {
+      'Tất cả': 'Tất cả',
+      'Cá nhân': 'Cá nhân',
+      'Sáng tạo nội dung': 'Sáng tạo nội dung',
+      'Dự án': 'Dự án',
+      'Học tập/Phát triển': 'Học tập/Phát triển',
+    },
+    taskPriorities: {
+      'Bình thường': 'Bình thường',
+      'Quan trọng': 'Quan trọng',
+      'Rất quan trọng': 'Rất quan trọng',
+    },
+    filterAll: "Tất cả",
+    filterNoTasks: "Chưa có công việc nào. Hãy thêm một công việc mới!",
+    filterNoTasksInCategory: (category) => `Chưa có công việc nào trong danh mục "${category}".`,
+    buttonClearCompleted: "Xóa công việc hoàn thành",
+    modalConfirm: "Xác nhận",
+    modalConfirmClearCompleted: "Bạn có chắc chắn muốn xóa tất cả công việc đã hoàn thành không?",
+    modalConfirmDeleteTask: "Bạn có chắc chắn muốn xóa công việc này không?",
+    modalConfirmDeleteVocab: "Bạn có chắc chắn muốn xóa từ vựng này không?",
+    buttonConfirm: "Xác nhận",
+    buttonCancel: "Hủy bỏ",
+    vocabTitle: "Từ vựng tiếng Nhật của tôi",
+    placeholderVocabWord: "Từ tiếng Nhật (例: 桜)",
+    placeholderVocabReading: "Cách đọc (例: さくら)",
+    placeholderVocabMeaning: "Nghĩa của từ (例: Hoa anh đào)",
+    placeholderVocabNotes: "Ghi chú/Ví dụ (tùy chọn)",
+    labelSelectTopic: "Chọn chủ đề:",
+    buttonAddVocab: "Thêm từ vựng",
+    filterNoVocab: "Chưa có từ vựng nào. Hãy thêm từ mới!",
+    filterNoVocabInTopic: (topic) => `Chưa có từ vựng nào trong chủ đề "${topic}".`,
+    vocabReading: "Đọc",
+    vocabMeaning: "Nghĩa",
+    vocabNotes: "Ghi chú",
+    vocabTopic: "Chủ đề",
+    taskDueDate: "Hạn",
+    userAvatarPlaceholder: "Dán URL ảnh đại diện vào đây",
+    nameDisplay: "Ngọc Duyên - ゆかり",
+    languageSwitch: "日本語", // Button to switch to Japanese
+  },
+  ja: {
+    appName: "日々の計画",
+    currentDatePrefix: "",
+    messageAddTask: "タスクが追加されました！",
+    messageEnterTask: "タスクを入力してください！",
+    messageUpdateTask: "タスクが更新されました！",
+    messageEmptyTaskContent: "タスクの内容は空にできません！",
+    messageNoCompletedTasks: "完了したタスクはありません。",
+    messageClearCompleted: "完了したタスクを削除しました！",
+    messageAddVocab: "単語が追加されました！",
+    messageEmptyVocab: "単語とその意味を入力してください！",
+    messageUpdateVocab: "単語が更新されました！",
+    messageEmptyVocabContent: "単語とその意味は空にできません！",
+    messageDeleteVocab: "単語が削除されました！",
+    placeholderNewTask: "新しいタスクを追加...",
+    buttonAdd: "追加",
+    labelSelectCategory: "カテゴリを選択:",
+    labelPriority: "優先度:",
+    labelDueDate: "期限日 (任意):",
+    labelNote: "メモ (任意):",
+    placeholderTaskNote: "タスクの詳細なメモを追加...",
+    // Task categories and priorities for display (Japanese translations)
+    taskCategories: {
+      'Tất cả': 'すべて',
+      'Cá nhân': '個人',
+      'Sáng tạo nội dung': 'コンテンツ作成',
+      'Dự án': 'プロジェクト',
+      'Học tập/Phát triển': '学習・開発',
+    },
+    taskPriorities: {
+      'Bình thường': '通常',
+      'Quan trọng': '重要',
+      'Rất quan trọng': '最重要',
+    },
+    filterAll: "すべて",
+    filterNoTasks: "まだタスクはありません。新しいタスクを追加してください！",
+    filterNoTasksInCategory: (category) => `"${languageContent.ja.taskCategories[category]}"カテゴリにはタスクがありません。`,
+    buttonClearCompleted: "完了したタスクを削除",
+    modalConfirm: "確認",
+    modalConfirmClearCompleted: "完了したすべてのタスクを本当に削除しますか？",
+    modalConfirmDeleteTask: "このタスクを本当に削除しますか？",
+    modalConfirmDeleteVocab: "この単語を本当に削除しますか？",
+    buttonConfirm: "確認",
+    buttonCancel: "キャンセル",
+    vocabTitle: "私の日本語の語彙",
+    placeholderVocabWord: "日本語の単語 (例: 桜)",
+    placeholderVocabReading: "読み方 (例: さくら)",
+    placeholderVocabMeaning: "意味 (例: 桜の花)",
+    placeholderVocabNotes: "メモ/例 (任意)",
+    labelSelectTopic: "トピックを選択:",
+    buttonAddVocab: "単語を追加",
+    filterNoVocab: "まだ単語はありません。新しい単語を追加してください！",
+    filterNoVocabInTopic: (topic) => `"${topic}"トピックには単語がありません。`,
+    vocabReading: "読み",
+    vocabMeaning: "意味",
+    vocabNotes: "メモ",
+    vocabTopic: "トピック",
+    taskDueDate: "期限",
+    userAvatarPlaceholder: "アバターのURLをここに貼り付け",
+    nameDisplay: "Ngọc Duyên - ゆかり",
+    languageSwitch: "Tiếng Việt", // Button to switch to Vietnamese
+  },
+};
+
+// Main App component
+export default function App() {
+  // State for current language, initialized from localStorage or default to 'vi'
+  const [lang, setLang] = useState(() => localStorage.getItem('appLanguage') || 'vi');
+  const t = languageContent[lang]; // 't' for translation function
+
+  // State to store the current date
+  const [currentDate, setCurrentDate] = useState('');
+  // State to store the list of tasks, initialized from localStorage
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem('dailyPlanTasks');
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
+  // State to store the new task input value
+  const [newTask, setNewTask] = useState('');
+  // State for showing custom messages (e.g., "Task added!")
+  const [message, setMessage] = useState('');
+  // State to track which task is currently being edited
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  // State to store the temporary text while editing a task
+  const [editingText, setEditingText] = useState('');
+  // State to control the visibility of the confirmation modal
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // State to store the ID of the item to be deleted (task or vocab)
+  const [itemToDeleteId, setItemToDeleteId] = useState(null);
+  // State to determine if we are clearing all completed tasks or a single one/vocab
+  const [confirmAction, setConfirmAction] = useState(null); // 'clearCompleted', 'deleteSingleTask', or 'deleteVocab'
+
+  // States for task categories (internal values)
+  const categories = ['Tất cả', 'Cá nhân', 'Sáng tạo nội dung', 'Dự án', 'Học tập/Phát triển'];
+  // State for the category of the new task being added
+  const [newTaskCategory, setNewTaskCategory] = useState(categories[1]); // Default to 'Cá nhân'
+  // State for the currently selected filter category
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]); // Default to 'Tất cả'
+
+  // States for task priority (internal values)
+  const priorities = ['Bình thường', 'Quan trọng', 'Rất quan trọng'];
+  const [newTaskPriority, setNewTaskPriority] = useState(priorities[0]); // Default to 'Bình thường'
+  const [newTaskDueDate, setNewTaskDueDate] = useState(''); // Default to empty
+  const [newTaskNote, setNewTaskNote] = useState(''); // Default to empty
+
+  // States for editing task priority, due date, and note
+  const [editingPriority, setEditingPriority] = useState('');
+  const [editingDueDate, setEditingDueDate] = useState('');
+  const [editingNote, setEditingNote] = useState('');
+
+  // New states for Japanese vocabulary
+  const [japaneseVocab, setJapaneseVocab] = useState(() => {
+    const savedVocab = localStorage.getItem('japaneseVocabList');
+    return savedVocab ? JSON.parse(savedVocab) : [];
+  });
+  const [newVocabWord, setNewVocabWord] = useState('');
+  const [newVocabReading, setNewVocabReading] = useState('');
+  const [newVocabMeaning, setNewVocabMeaning] = useState('');
+  const [newVocabNotes, setNewVocabNotes] = useState('');
+
+  // New state for vocabulary topics and their associated icons (internal values)
+  const vocabTopics = ['Tất cả', 'N5', 'N4', 'N3', 'N2', 'N1', 'Giao tiếp', 'Ẩm thực', 'Công việc', 'Thể thao', 'Công nghệ', 'Trường học', 'Du lịch', 'Sức khỏe'];
+  const topicIcons = {
+    'Tất cả': List,
+    'N5': Star,
+    'N4': Star,
+    'N3': Star,
+    'N2': Star,
+    'N1': Star,
+    'Giao tiếp': MessageSquare,
+    'Ẩm thực': Utensils,
+    'Công việc': Briefcase,
+    'Thể thao': Dumbbell,
+    'Công nghệ': Laptop,
+    'Trường học': BookOpen,
+    'Du lịch': Plane,
+    'Sức khỏe': HeartPulse,
+  };
+  const [newVocabTopic, setNewVocabTopic] = useState(vocabTopics[1]); // Default to 'N5'
+  const [selectedVocabTopic, setSelectedVocabTopic] = useState(vocabTopics[0]); // Default to 'Tất cả'
+
+
+  // States for editing Japanese vocabulary
+  const [editingVocabEntryId, setEditingVocabEntryId] = useState(null);
+  const [editingVocabWord, setEditingVocabWord] = useState('');
+  const [editingVocabReading, setEditingVocabReading] = useState('');
+  const [editingVocabMeaning, setEditingVocabMeaning] = useState('');
+  const [editingVocabNotes, setEditingVocabNotes] = useState('');
+  const [editingVocabTopic, setEditingVocabTopic] = useState('');
+
+  // New state for user avatar
+  const [userAvatar, setUserAvatar] = useState(() => {
+    return localStorage.getItem('userAvatar') || ''; // Load from localStorage
+  });
+
+
+  // Effect to set the current date when the component mounts and when language changes
+  useEffect(() => {
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    setCurrentDate(today.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'ja-JP', options));
+  }, [lang]); // Re-run effect when lang changes
+
+  // Effect to save tasks to localStorage whenever the tasks state changes
+  useEffect(() => {
+    localStorage.setItem('dailyPlanTasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  // Effect to save vocabulary to localStorage whenever the japaneseVocab state changes
+  useEffect(() => {
+    localStorage.setItem('japaneseVocabList', JSON.stringify(japaneseVocab));
+  }, [japaneseVocab]);
+
+  // Effect to save user avatar to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('userAvatar', userAvatar);
+  }, [userAvatar]);
+
+  // Function to handle adding a new task
+  const handleAddTask = () => {
+    const trimmedTask = newTask.trim();
+    if (trimmedTask) {
+      setTasks([
+        ...tasks,
+        {
+          id: Date.now(),
+          text: trimmedTask,
+          completed: false,
+          category: newTaskCategory,
+          priority: newTaskPriority,
+          dueDate: newTaskDueDate,
+          note: newTaskNote.trim(),
+        },
+      ]);
+      setNewTask(''); // Clear the input field
+      setNewTaskDueDate(''); // Clear due date
+      setNewTaskNote(''); // Clear note
+      setNewTaskPriority(priorities[0]); // Reset priority
+      showMessage(t.messageAddTask); // Show confirmation message
+    } else {
+      showMessage(t.messageEnterTask); // Show error message if input is empty
+    }
+  };
+
+  // Function to handle toggling task completion status
+  const handleToggleComplete = (id) => {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
+  // Function to start editing a task
+  const handleEditTask = (task) => {
+    setEditingTaskId(task.id);
+    setEditingText(task.text);
+    setEditingPriority(task.priority || priorities[0]); // Set default if not present
+    setEditingDueDate(task.dueDate || ''); // Set default if not present
+    setEditingNote(task.note || ''); // Set default if not present
+  };
+
+  // Function to save the edited task
+  const handleSaveEdit = (id) => {
+    const trimmedText = editingText.trim();
+    if (trimmedText) {
+      setTasks(tasks.map(task =>
+        task.id === id
+          ? {
+              ...task,
+              text: trimmedText,
+              priority: editingPriority,
+              dueDate: editingDueDate,
+              note: editingNote.trim(),
+            }
+          : task
+      ));
+      setEditingTaskId(null); // Exit editing mode
+      setEditingText(''); // Clear editing text
+      setEditingPriority(''); // Clear editing priority
+      setEditingDueDate(''); // Clear editing due date
+      setEditingNote(''); // Clear editing note
+      showMessage(t.messageUpdateTask);
+    } else {
+      showMessage(t.messageEmptyTaskContent);
+    }
+  };
+
+  // Function to handle deleting a single task (opens confirmation modal)
+  const handleDeleteSingleTask = (id) => {
+    setItemToDeleteId(id);
+    setConfirmAction('deleteSingleTask');
+    setShowConfirmModal(true);
+  };
+
+  // Function to handle clearing all completed tasks (opens confirmation modal)
+  const handleClearCompleted = () => {
+    const incompleteTasks = tasks.filter(task => !task.completed);
+    if (incompleteTasks.length === tasks.length) {
+      showMessage(t.messageNoCompletedTasks);
+    } else {
+      setConfirmAction('clearCompleted');
+      setShowConfirmModal(true);
+    }
+  };
+
+  // --- Japanese Vocabulary Functions ---
+  // Function to handle adding new vocabulary
+  const handleAddVocab = () => {
+    const trimmedWord = newVocabWord.trim();
+    const trimmedMeaning = newVocabMeaning.trim();
+    if (trimmedWord && trimmedMeaning) {
+      setJapaneseVocab([
+        ...japaneseVocab,
+        {
+          id: Date.now(),
+          word: trimmedWord,
+          reading: newVocabReading.trim(),
+          meaning: trimmedMeaning,
+          notes: newVocabNotes.trim(),
+          topic: newVocabTopic, // Add the new topic field
+        },
+      ]);
+      setNewVocabWord('');
+      setNewVocabReading('');
+      setNewVocabMeaning('');
+      setNewVocabNotes('');
+      setNewVocabTopic(vocabTopics[1]); // Reset topic
+      showMessage(t.messageAddVocab);
+    } else {
+      showMessage(t.messageEmptyVocab);
+    }
+  };
+
+  // Function to start editing a vocabulary entry
+  const handleEditVocab = (entry) => {
+    setEditingVocabEntryId(entry.id);
+    setEditingVocabWord(entry.word);
+    setEditingVocabReading(entry.reading);
+    setEditingVocabMeaning(entry.meaning);
+    setEditingVocabNotes(entry.notes);
+    setEditingVocabTopic(entry.topic || vocabTopics[1]); // Set default if not present
+  };
+
+  // Function to save the edited vocabulary entry
+  const handleSaveVocabEdit = (id) => {
+    const trimmedWord = editingVocabWord.trim();
+    const trimmedMeaning = editingVocabMeaning.trim();
+    if (trimmedWord && trimmedMeaning) {
+      setJapaneseVocab(japaneseVocab.map(entry =>
+        entry.id === id
+          ? {
+              ...entry,
+              word: trimmedWord,
+              reading: editingVocabReading.trim(),
+              meaning: trimmedMeaning,
+              notes: editingVocabNotes.trim(),
+              topic: editingVocabTopic, // Save the edited topic
+            }
+          : entry
+      ));
+      setEditingVocabEntryId(null);
+      setEditingVocabWord('');
+      setEditingVocabReading('');
+      setEditingVocabMeaning('');
+      setEditingVocabNotes('');
+      setEditingVocabTopic('');
+      showMessage(t.messageUpdateVocab);
+    } else {
+      showMessage(t.messageEmptyVocabContent);
+    }
+  };
+
+  // Function to handle deleting a vocabulary entry
+  const handleDeleteVocab = (id) => {
+    setItemToDeleteId(id);
+    setConfirmAction('deleteVocab');
+    setShowConfirmModal(true);
+  };
+
+  // --- Confirmation Modal Logic ---
+  // Function to confirm and execute the action from the modal
+  const confirmActionExecute = () => {
+    if (confirmAction === 'clearCompleted') {
+      setTasks(tasks.filter(task => !task.completed));
+      showMessage(t.messageClearCompleted);
+    } else if (confirmAction === 'deleteSingleTask' && itemToDeleteId) {
+      setTasks(tasks.filter(task => task.id !== itemToDeleteId));
+      showMessage(t.messageDeleteVocab); // Using vocab delete message for task for simplicity
+    } else if (confirmAction === 'deleteVocab' && itemToDeleteId) {
+      setJapaneseVocab(japaneseVocab.filter(entry => entry.id !== itemToDeleteId));
+      showMessage(t.messageDeleteVocab);
+    }
+    setShowConfirmModal(false);
+    setItemToDeleteId(null);
+    setConfirmAction(null);
+  };
+
+  // Function to cancel the action from the modal
+  const cancelActionExecute = () => {
+    setShowConfirmModal(false);
+    setItemToDeleteId(null);
+    setConfirmAction(null);
+  };
+
+  // Function to display a temporary message
+  const showMessage = (msg) => {
+    setMessage(msg);
+    const timer = setTimeout(() => {
+      setMessage('');
+    }, 2000); // Message disappears after 2 seconds
+    return () => clearTimeout(timer); // Cleanup timer if component unmounts
+  };
+
+  // Filter tasks based on the selected category
+  const filteredTasks = tasks.filter(task =>
+    selectedCategory === 'Tất cả' || task.category === selectedCategory
+  );
+
+  // Filter vocabulary based on the selected topic
+  const filteredVocab = japaneseVocab.filter(entry =>
+    selectedVocabTopic === 'Tất cả' || entry.topic === selectedVocabTopic
+  );
+
+  // Function to get priority color class
+  const getPriorityColorClass = (priority) => {
+    switch (priority) {
+      case 'Rất quan trọng':
+        return 'bg-red-500';
+      case 'Quan trọng':
+        return 'bg-yellow-500';
+      case 'Bình thường':
+      default:
+        return 'bg-gray-400';
+    }
+  };
+
+  // Helper function to get icon component based on topic name
+  const getTopicIcon = (topicName) => {
+    const IconComponent = topicIcons[topicName];
+    return IconComponent ? <IconComponent size={16} className="inline-block mr-1" /> : null;
+  };
+
+  // Function to toggle language
+  const toggleLanguage = () => {
+    const newLang = lang === 'vi' ? 'ja' : 'vi';
+    setLang(newLang);
+    localStorage.setItem('appLanguage', newLang); // Save language preference
+  };
+
+  return (
+    <div className="min-h-screen bg-pink-100 flex items-center justify-center p-4 font-inter">
+      <div className="flex flex-col gap-8 w-full max-w-md"> {/* Wrapper for two cards */}
+        {/* Language Switcher Button */}
+        <div className="w-full text-right">
+          <button
+            onClick={toggleLanguage}
+            className="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105"
+          >
+            {t.languageSwitch}
+          </button>
+        </div>
+
+        {/* Main container for the daily plan app */}
+        <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full border-2 border-pink-300">
+          {/* Header section */}
+          <h1 className="text-3xl md:text-4xl font-bold text-pink-700 mb-2 text-center">{t.appName}</h1>
+          <p className="text-pink-500 text-lg md:text-xl mb-6 text-center">{t.currentDatePrefix}{currentDate}</p>
+
+          {/* Message display area */}
+          {message && (
+            <div className="bg-pink-200 text-pink-800 p-3 rounded-lg mb-4 text-center text-sm">
+              {message}
+            </div>
+          )}
+
+          {/* Task input section */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <input
+              type="text"
+              className="flex-grow p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 placeholder-pink-400"
+              placeholder={t.placeholderNewTask}
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddTask();
+                }
+              }}
+            />
+            <button
+              onClick={handleAddTask}
+              className="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105"
+            >
+              {t.buttonAdd}
+            </button>
+          </div>
+
+          {/* Category, Priority, Due Date, and Note selection for new task */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label htmlFor="task-category" className="block text-pink-600 text-sm font-medium mb-2">{t.labelSelectCategory}</label>
+              <select
+                id="task-category"
+                value={newTaskCategory}
+                onChange={(e) => setNewTaskCategory(e.target.value)}
+                className="w-full p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 bg-white"
+              >
+                {categories.slice(1).map(cat => ( // Exclude 'Tất cả' from new task categories
+                  <option key={cat} value={cat}>{t.taskCategories[cat]}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="task-priority" className="block text-pink-600 text-sm font-medium mb-2">{t.labelPriority}</label>
+              <select
+                id="task-priority"
+                value={newTaskPriority}
+                onChange={(e) => setNewTaskPriority(e.target.value)}
+                className="w-full p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 bg-white"
+              >
+                {priorities.map(p => (
+                  <option key={p} value={p}>{t.taskPriorities[p]}</option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="task-due-date" className="block text-pink-600 text-sm font-medium mb-2">{t.labelDueDate}</label>
+              <input
+                type="date"
+                id="task-due-date"
+                value={newTaskDueDate}
+                onChange={(e) => setNewTaskDueDate(e.target.value)}
+                className="w-full p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 bg-white"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="task-note" className="block text-pink-600 text-sm font-medium mb-2">{t.labelNote}</label>
+              <textarea
+                id="task-note"
+                value={newTaskNote}
+                onChange={(e) => setNewTaskNote(e.target.value)}
+                rows="3"
+                className="w-full p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 placeholder-pink-400"
+                placeholder={t.placeholderTaskNote}
+              ></textarea>
+            </div>
+          </div>
+
+          {/* Category filter buttons */}
+          <div className="flex flex-wrap justify-center gap-2 mb-6">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`py-2 px-4 rounded-full text-sm font-semibold transition-all duration-200 ease-in-out ${
+                  selectedCategory === cat
+                    ? 'bg-pink-600 text-white shadow-md'
+                    : 'bg-pink-200 text-pink-700 hover:bg-pink-300'
+                }`}
+              >
+                {t.taskCategories[cat]}
+              </button>
+            ))}
+          </div>
+
+          {/* Task list section */}
+          {filteredTasks.length === 0 ? (
+            <p className="text-center text-pink-400 text-lg">
+              {selectedCategory === 'Tất cả'
+                ? t.filterNoTasks
+                : t.filterNoTasksInCategory(selectedCategory)}
+            </p>
+          ) : (
+            <ul className="space-y-3 mb-6">
+              {filteredTasks.map((task) => (
+                <li
+                  key={task.id}
+                  className={`flex flex-col p-3 rounded-lg shadow-sm transition-all duration-200 border border-pink-200 ${
+                    task.completed ? 'bg-pink-50 line-through text-pink-400' : 'bg-pink-100 text-pink-800'
+                  }`}
+                >
+                  <div className="flex items-center w-full">
+                    <input
+                      type="checkbox"
+                      checked={task.completed}
+                      onChange={() => handleToggleComplete(task.id)}
+                      className="form-checkbox h-5 w-5 text-pink-600 rounded-md border-pink-300 focus:ring-pink-500 cursor-pointer"
+                    />
+                    {editingTaskId === task.id ? (
+                      <input
+                        type="text"
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        onBlur={() => handleSaveEdit(task.id)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSaveEdit(task.id);
+                          }
+                        }}
+                        className="ml-3 flex-grow p-1 border-b-2 border-pink-400 bg-transparent focus:outline-none text-pink-800"
+                        autoFocus // Automatically focus the input when it appears
+                      />
+                    ) : (
+                      <span className="ml-3 text-base flex-grow break-words">
+                        {task.text}
+                      </span>
+                    )}
+                    <div className="flex items-center ml-auto space-x-2">
+                      {editingTaskId === task.id ? (
+                        <button
+                          onClick={() => handleSaveEdit(task.id)}
+                          className="text-pink-600 hover:text-pink-800 p-1 rounded-full hover:bg-pink-200 transition-colors duration-200"
+                          aria-label="Lưu công việc"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleEditTask(task)}
+                          className="text-pink-600 hover:text-pink-800 p-1 rounded-full hover:bg-pink-200 transition-colors duration-200"
+                          aria-label="Chỉnh sửa công việc"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                            <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteSingleTask(task.id)}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors duration-200"
+                        aria-label="Xóa công việc"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Task details: Category, Priority, Due Date, Note */}
+                  <div className="flex flex-wrap items-center text-xs mt-2 w-full">
+                    {/* Category tag */}
+                    {task.category && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-pink-300 text-pink-800 mr-2 mb-1">
+                        {t.taskCategories[task.category]}
+                      </span>
+                    )}
+                    {/* Priority tag */}
+                    {task.priority && (
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-medium text-white mr-2 mb-1 ${getPriorityColorClass(task.priority)}`}>
+                        {t.taskPriorities[task.priority]}
+                      </span>
+                    )}
+                    {/* Due Date */}
+                    {task.dueDate && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-purple-200 text-purple-800 mr-2 mb-1">
+                        {t.taskDueDate}: {new Date(task.dueDate).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'ja-JP')}
+                      </span>
+                    )}
+                  </div>
+                  {/* Note display */}
+                  {task.note && (
+                    <p className="text-sm text-pink-600 mt-2 p-2 bg-pink-100 rounded-lg border border-pink-200 w-full break-words">
+                      {t.vocabNotes}: {task.note}
+                    </p>
+                  )}
+
+                  {/* Editing fields for priority, due date, and note */}
+                  {editingTaskId === task.id && (
+                    <div className="flex flex-col gap-2 mt-3 p-2 bg-pink-100 rounded-lg border border-pink-200 w-full">
+                      <label htmlFor={`edit-priority-${task.id}`} className="block text-pink-600 text-sm font-medium">{t.labelPriority}</label>
+                      <select
+                        id={`edit-priority-${task.id}`}
+                        value={editingPriority}
+                        onChange={(e) => setEditingPriority(e.target.value)}
+                        className="w-full p-2 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 bg-white"
+                      >
+                        {priorities.map(p => (
+                          <option key={p} value={p}>{t.taskPriorities[p]}</option>
+                        ))}
+                      </select>
+
+                      <label htmlFor={`edit-due-date-${task.id}`} className="block text-pink-600 text-sm font-medium">{t.labelDueDate}</label>
+                      <input
+                        type="date"
+                        id={`edit-due-date-${task.id}`}
+                        value={editingDueDate}
+                        onChange={(e) => setEditingDueDate(e.target.value)}
+                        className="w-full p-2 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 bg-white"
+                      />
+
+                      <label htmlFor={`edit-note-${task.id}`} className="block text-pink-600 text-sm font-medium">{t.labelNote}</label>
+                      <textarea
+                        id={`edit-note-${task.id}`}
+                        value={editingNote}
+                        onChange={(e) => setEditingNote(e.target.value)}
+                        rows="3"
+                        className="w-full p-2 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 placeholder-pink-400"
+                        placeholder={t.placeholderTaskNote}
+                      ></textarea>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Clear completed tasks button */}
+          {tasks.length > 0 && (
+            <button
+              onClick={handleClearCompleted}
+              className="w-full bg-pink-700 hover:bg-pink-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 mt-4"
+            >
+              {t.buttonClearCompleted}
+            </button>
+          )}
+        </div>
+
+        {/* Japanese Vocabulary Card */}
+        <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full border-2 border-pink-300">
+          <h2 className="text-2xl md:text-3xl font-bold text-pink-700 mb-4 text-center">{t.vocabTitle}</h2>
+
+          {/* Input fields for new vocab */}
+          <div className="grid grid-cols-1 gap-4 mb-6">
+            <input
+              type="text"
+              placeholder={t.placeholderVocabWord}
+              value={newVocabWord}
+              onChange={(e) => setNewVocabWord(e.target.value)}
+              className="p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 placeholder-pink-400"
+            />
+            <input
+              type="text"
+              placeholder={t.placeholderVocabReading}
+              value={newVocabReading}
+              onChange={(e) => setNewVocabReading(e.target.value)}
+              className="p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 placeholder-pink-400"
+            />
+            <textarea
+              placeholder={t.placeholderVocabMeaning}
+              value={newVocabMeaning}
+              onChange={(e) => setNewVocabMeaning(e.target.value)}
+              rows="2"
+              className="p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 placeholder-pink-400"
+            ></textarea>
+            <textarea
+              placeholder={t.placeholderVocabNotes}
+              value={newVocabNotes}
+              onChange={(e) => setNewVocabNotes(e.target.value)}
+              rows="2"
+              className="p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 placeholder-pink-400"
+            ></textarea>
+            {/* New: Vocab Topic selection */}
+            <div>
+              <label htmlFor="vocab-topic" className="block text-pink-600 text-sm font-medium mb-2">{t.labelSelectTopic}</label>
+              <select
+                id="vocab-topic"
+                value={newVocabTopic}
+                onChange={(e) => setNewVocabTopic(e.target.value)}
+                className="w-full p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-500 text-pink-800 bg-white"
+              >
+                {vocabTopics.slice(1).map(topic => ( // Exclude 'Tất cả' from new vocab topics
+                  <option key={topic} value={topic}>{topic}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={handleAddVocab}
+              className="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105"
+            >
+              {t.buttonAddVocab}
+            </button>
+          </div>
+
+          {/* New: Vocab Topic filter buttons */}
+          <div className="flex flex-wrap justify-center gap-2 mb-6">
+            {vocabTopics.map(topic => (
+              <button
+                key={topic}
+                onClick={() => setSelectedVocabTopic(topic)}
+                className={`py-2 px-4 rounded-full text-sm font-semibold transition-all duration-200 ease-in-out flex items-center ${
+                  selectedVocabTopic === topic
+                    ? 'bg-pink-600 text-white shadow-md'
+                    : 'bg-pink-200 text-pink-700 hover:bg-pink-300'
+                }`}
+              >
+                {getTopicIcon(topic)} {topic}
+              </button>
+            ))}
+          </div>
+
+          {/* Vocabulary list */}
+          {filteredVocab.length === 0 ? (
+            <p className="text-center text-pink-400 text-lg">
+              {selectedVocabTopic === 'Tất cả'
+                ? t.filterNoVocab
+                : t.filterNoVocabInTopic(selectedVocabTopic)}
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {filteredVocab.map((entry) => (
+                <li key={entry.id} className="p-3 rounded-lg shadow-sm bg-pink-100 border border-pink-200">
+                  {editingVocabEntryId === entry.id ? (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        type="text"
+                        value={editingVocabWord}
+                        onChange={(e) => setEditingVocabWord(e.target.value)}
+                        className="p-2 border-b-2 border-pink-400 bg-transparent focus:outline-none text-pink-800 font-bold text-lg"
+                        autoFocus
+                      />
+                      <input
+                        type="text"
+                        value={editingVocabReading}
+                        onChange={(e) => setEditingVocabReading(e.target.value)}
+                        className="p-2 border-b-2 border-pink-400 bg-transparent focus:outline-none text-pink-600"
+                      />
+                      <textarea
+                        value={editingVocabMeaning}
+                        onChange={(e) => setEditingVocabMeaning(e.target.value)}
+                        rows="2"
+                        className="p-2 border-b-2 border-pink-400 bg-transparent focus:outline-none text-pink-800"
+                      ></textarea>
+                      <textarea
+                        value={editingVocabNotes}
+                        onChange={(e) => setEditingVocabNotes(e.target.value)}
+                        rows="2"
+                        className="p-2 border-b-2 border-pink-400 bg-transparent focus:outline-none text-pink-600"
+                      ></textarea>
+                      {/* New: Editing Vocab Topic */}
+                      <div>
+                        <label htmlFor={`edit-vocab-topic-${entry.id}`} className="block text-pink-600 text-sm font-medium mb-2">{t.labelSelectTopic}</label>
+                        <select
+                          id={`edit-vocab-topic-${entry.id}`}
+                          value={editingVocabTopic}
+                          onChange={(e) => setEditingVocabTopic(e.target.value)}
+                          className="w-full p-2 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-500 text-pink-800 bg-white"
+                        >
+                          {vocabTopics.slice(1).map(topic => (
+                            <option key={topic} value={topic}>{topic}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-2">
+                        <button
+                          onClick={() => handleSaveVocabEdit(entry.id)}
+                          className="text-pink-600 hover:text-pink-800 p-1 rounded-full hover:bg-pink-200 transition-colors duration-200"
+                          aria-label="Lưu từ vựng"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-bold text-pink-700 text-lg">{entry.word}</span>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleEditVocab(entry)}
+                            className="text-pink-600 hover:text-pink-800 p-1 rounded-full hover:bg-pink-200 transition-colors duration-200"
+                            aria-label="Chỉnh sửa từ vựng"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                              <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteVocab(entry.id)}
+                            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors duration-200"
+                            aria-label="Xóa từ vựng"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      {entry.reading && <p className="text-pink-600 text-sm mb-1">{t.vocabReading}: {entry.reading}</p>}
+                      <p className="text-pink-800 mb-1">{t.vocabMeaning}: {entry.meaning}</p>
+                      {entry.notes && <p className="text-pink-500 text-sm italic">{t.vocabNotes}: {entry.notes}</p>}
+                      {/* Display topic tag */}
+                      {entry.topic && (
+                        <span className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-300 text-purple-800">
+                          {getTopicIcon(entry.topic)} {t.vocabTopic}: {entry.topic}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* User's Name and Avatar */}
+        <div className="w-full text-center mt-8 mb-4 flex flex-col items-center">
+          {userAvatar ? (
+            <img
+              src={userAvatar}
+              alt="Ảnh đại diện"
+              className="w-24 h-24 rounded-full object-cover border-2 border-pink-400 shadow-md mb-2"
+              onError={(e) => {
+                e.target.onerror = null; // Prevent infinite loop if fallback also fails
+                e.target.src = "https://placehold.co/96x96/FFB6C1/880000?text=Avatar"; // Fallback image
+              }}
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-pink-300 flex items-center justify-center text-white text-3xl font-bold mb-2 border-2 border-pink-400 shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-pink-600" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              </svg>
+            </div>
+          )}
+          <p className="text-pink-400 text-sm">{t.nameDisplay}</p>
+          <input
+            type="text"
+            placeholder={t.userAvatarPlaceholder}
+            value={userAvatar}
+            onChange={(e) => setUserAvatar(e.target.value)}
+            className="mt-2 w-full max-w-xs p-2 border-2 border-pink-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-800 placeholder-pink-400 text-center"
+          />
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 shadow-xl border-2 border-pink-300 max-w-sm w-full text-center">
+            <h3 className="text-xl font-bold text-pink-700 mb-4">{t.modalConfirm}</h3>
+            <p className="text-pink-600 mb-6">
+              {confirmAction === 'clearCompleted'
+                ? t.modalConfirmClearCompleted
+                : confirmAction === 'deleteSingleTask'
+                  ? t.modalConfirmDeleteTask
+                  : t.modalConfirmDeleteVocab}
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={confirmActionExecute}
+                className="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-5 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105"
+              >
+                {t.buttonConfirm}
+              </button>
+              <button
+                onClick={cancelActionExecute}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-5 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105"
+              >
+                {t.buttonCancel}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
